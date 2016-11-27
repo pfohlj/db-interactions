@@ -1,0 +1,25 @@
+{
+  "name": "db-interactions",
+  "version": "1.0.0",
+  "description": "Simple Exercise Tracking SPA",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pfohlj/db-interactions.git"
+  },
+  "author": "Joseph A Pfohl",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pfohlj/db-interactions/issues"
+  },
+  "homepage": "https://github.com/pfohlj/db-interactions",
+  "dependencies": {
+    "body-parser": "^1.15.2",
+    "express": "^4.14.0",
+    "express-handlebars": "^3.0.0",
+    "mysql": "^2.12.0"
+  }
+}
