@@ -1,0 +1,51 @@
+/* Shared
+**************************************/
+body {
+    padding-top: 5em;
+}
+
+.centered-text {
+    text-align: center;
+}
+
+.hidden-text {
+    visibility: hidden;
+}
+
+/* Sections
+*************************************/
+.section {
+    padding: 1em 0;
+}
+
+/* Inputs
+************************************/
+
+input[type="date"] {
+    height: 38px;
+    padding: 6px 10px; /* The 6px vertically centers text on FF, ignored by Webkit */
+    background-color: #fff;
+    border: 1px solid #D1D1D1;
+    border-radius: 4px;
+    box-shadow: none;
+    box-sizing: border-box;
+}
+
+/* reset-text
+***********************************/
+#reset-text {
+    color: red;
+}
+
+/* reset-button
+***********************************/
+
+#reset-button {
+    background-color: #D9534F;
+    color: #FFF;
+    border: none;
+}
+
+#reset-button:hover {
+    background-color: #b74542;
+}

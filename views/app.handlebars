@@ -1,9 +1,71 @@
-<div class="container">
-    <div class="row">
-        <div class="two columns"></div>
-        <div class="eight columns">
-            <h1>Workout Tracker</h1>
+<h1 class="centered-text">Workout Tracker</h1>
+
+{{#if reset}}
+    <em><p id="reset-text" class="centered-text">{{reset}}</p></em>
+{{/if}}
+
+<div class="section add-form">
+    <div class="container">
+        <h2>Add an Exercise</h2>
+        <form>
+            <div class="row">
+                <div class="three columns">
+                    <label for="exerciseName">Exercise Name</label>
+                    <input class="u-full-width" type="text" name="name" id="exerciseName">
+                </div>
+                <div class="two columns">
+                    <label for="repetitions">Repetitions</label>
+                    <input class="u-full-width" type="number" name="reps" id="repetitions">
+                </div>
+                <div class="two columns">
+                    <label for="weight">Weight</label>
+                    <input class="u-full-width" type="number" name="weight" id="weight">
+                </div>
+                <div class="two columns">
+                    <label for="unit">Unit</label>
+                    <select class="u-full-width" name="unit" id="unit">
+                        <option value="1">Pounds</option>
+                        <option value="0">Kilograms</option>
+                    </select>
+                </div>
+                <div class="three columns">
+                    <label for="date">Date Completed</label>
+                    <input class="u-full-width" type="date" name="date" id="date">
+                </div>
+            </div>
+            <div class="row">
+                <div class="two columns offset-by-four">
+                    <input id="add-button" class="u-full-width button-primary" type="button" value="Submit">
+                </div>
+                <div class="two columns">
+                    <button id="reset-button" class="u-full-width button" type="reset" value="Reset">Reset</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="section display-table">
+    <div class="container">
+        <h2>Completed Exercises</h2>
+        <div class="row">
+
+            <table class="u-full-width">
+                <thead>
+                    <tr>
+                        <th>Exercise Name</th>
+                        <th>Repititions</th>
+                        <th>Weight</th>
+                        <th>Date Completed</th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{!-- table rendered by JS will be here --}}
+                </tbody>
+            </table>
+
         </div>
-        <div class="two columns"></div>
     </div>
 </div>
