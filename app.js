@@ -56,8 +56,23 @@ app.get('/reset-table',function(req,res,next){
 });
 
 app.post('/add-exercise', function(req, res, next) {
-  var reqContent = JSON.parse(req.query);
-  console.log(reqContent);
+  res.type('application/json');
+  var results = {
+    'id': -1
+  };
+
+  var reqVals = [req.body.name, req.body.reps, req.body.weight, req.body.date, req.body.unit];
+  console.log(reqVals);
+  mysql.pool.query("INSERT INTO workouts (`name`, `reps`, `weight`, `date`, `lbs`) VALUES (?, ?, ?, ?, ?)", reqVals, function(err, result) {
+    if (err) {
+      console.log(err);
+      res.send(JSON.stringify(results));
+    } else {
+      results['id'] = result.insertId;
+      console.log(JSON.stringify(results))
+      res.send(JSON.stringify(results));
+    }
+  });
 });
 
 // 404 route

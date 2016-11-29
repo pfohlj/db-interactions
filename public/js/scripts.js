@@ -22,7 +22,7 @@ function addExercise(event) {
     req.addEventListener('load', function() {
         if (req.status >= 200 && req.status < 400) {
 
-           return;
+           console.log(JSON.parse(req.responseText));
 
 		} else {
 			
