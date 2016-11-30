@@ -55,24 +55,40 @@ app.get('/reset-table',function(req,res,next){
   });
 });
 
-app.post('/add-exercise', function(req, res, next) {
+app.get('/render-table', function(req, res, next){
+
   res.type('application/json');
+  mysql.pool.query('SELECT * FROM workouts', function(err, rows, fields){
+    if (err) {
+      res.send(JSON.stringify({"error": "true"}));
+    } else {
+      res.send(JSON.stringify(rows));
+    }
+  });
+
+});
+
+app.post('/add-exercise', function(req, res, next) {
+  
+  var reqVals = [req.body.name, req.body.reps, req.body.weight, req.body.date, req.body.unit];
+  var addString = 'INSERT INTO workouts (`name`, `reps`, `weight`, `date`, `lbs`)'
+                + 'VALUES (?, ?, ?, ?, ?)';
   var results = {
     'id': -1
   };
+  
+  res.type('application/json');
 
-  var reqVals = [req.body.name, req.body.reps, req.body.weight, req.body.date, req.body.unit];
-  console.log(reqVals);
-  mysql.pool.query("INSERT INTO workouts (`name`, `reps`, `weight`, `date`, `lbs`) VALUES (?, ?, ?, ?, ?)", reqVals, function(err, result) {
+  mysql.pool.query(addString, reqVals, function(err, result) {
+
     if (err) {
-      console.log(err);
       res.send(JSON.stringify(results));
     } else {
       results['id'] = result.insertId;
-      console.log(JSON.stringify(results))
       res.send(JSON.stringify(results));
     }
   });
+
 });
 
 // 404 route
