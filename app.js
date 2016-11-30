@@ -91,6 +91,22 @@ app.post('/add-exercise', function(req, res, next) {
 
 });
 
+app.post('/delete-exercise', function(req, res, next) {
+
+  var deleteString = 'DELETE FROM workouts WHERE id = (?)';
+
+  res.type('application/json');
+
+  mysql.pool.query(deleteString, [req.body.id], function(err, result){
+    if(err) {
+      res.send(JSON.stringify({"error": "true"}));
+    } else {
+      res.send(JSON.stringify({"error": "false"}));
+    }
+  });
+  
+});
+
 // 404 route
 app.use(function(req,res){
   res.status(404);

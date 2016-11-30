@@ -37,15 +37,44 @@ input[type="date"] {
     color: red;
 }
 
-/* reset-button
+/* Buttons
 ***********************************/
 
-#reset-button {
+#reset-button, .delete-button {
     background-color: #D9534F;
     color: #FFF;
     border: none;
 }
 
-#reset-button:hover {
+#reset-button:hover, .delete-button:hover {
     background-color: #b74542;
+    color: #fff;
+}
+
+.edit-button {
+    background-color: #F0AD4E;
+    color: #fff;
+    border: none;
+}
+
+.edit-button:hover {
+    background-color: #ba873f;
+    color: #fff;
+}
+
+#save-button {
+    background-color: #5CB85C;
+    color: #fff;
+    border: none;
+}
+
+#save-button:hover {
+    background-color: #4f9b4f;
+    color: #fff;
+}
+
+.disabled-button {
+    background-color: #F7F7F9 !important;
+    color: #626466 !important;
+    border-color: #F7F7F9 !important;
 }
