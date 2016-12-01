@@ -1,9 +1,17 @@
+{{!--
+Name: Joseph A Pfohl
+Date: 11/30/2016
+Class: CS290-400-F2016
+Content of body for Single page application workout tracker
+--}}
+
 <h1 class="centered-text">Workout Tracker</h1>
 
-{{#if reset}}
+{{#if reset}} {{! Only displays after visiting reset-table route}}
     <em><p class="reset-text" class="centered-text">{{reset}}</p></em>
 {{/if}}
 
+{{!-- Form for adding an exercise --}}
 <div class="section add-form">
     <div class="container">
         <h2>Add an Exercise</h2>
@@ -46,6 +54,7 @@
     </div>
 </div>
 
+{{!-- Table for displaying rendered table of workouts --}}
 <div class="section display-table">
     <div class="container">
         <h2>Completed Exercises</h2>

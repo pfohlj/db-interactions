@@ -1,24 +1,32 @@
+{{!--
+Name: Joseph A Pfohl
+Date: 11/30/2016
+Class: CS290-400-F2016
+This file contains the default template in which the main page is rendered.  It has all
+necessary meta, link, and script tags to make the page function correctly.
+--}}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 
   <meta charset="utf-8">
-  <title>db-interactions</title>
+  <title>Workout Tracker</title>
   <meta name="description" content="">
   <meta name="author" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
-  <link rel="stylesheet" href="css/normalize.css">
-  <link rel="stylesheet" href="css/skeleton.css">
-  <link rel="stylesheet" href="css/custom.css">
+  <link rel="stylesheet" href="css/normalize.css">  {{! Set a base standard for styles }}
+  <link rel="stylesheet" href="css/skeleton.css">   {{! Layout and basic grid }}
+  <link rel="stylesheet" href="css/custom.css">     {{! Custom styles over and above skeleton }}
 
 </head>
 <body>
 
   {{{body}}}
 
-  <script src="js/jquery-3.1.1.min.js"></script>
-  <script src="js/scripts.js"></script>
-  <script src="js/jquery.date.js"></script>
+  <script src="js/jquery-3.1.1.min.js"></script>    {{! Easy DOM manipulation }}
+  <script src="js/scripts.js"></script>             {{! Custom app scripts }}
+  <script src="js/jquery.date.js"></script>         {{! Polyfill for input[type=date] in unsupported browsers}}
 </body>
 </html>

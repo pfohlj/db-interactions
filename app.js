@@ -1,8 +1,8 @@
 /*****************************************************************************************
 ** Name: Joseph A Pfohl
-** Date: 
-** Assignment: 
-** Description: 
+** Date: 11/30/2016
+** Assignment: db-interactions
+** Description: this is the server side code for the db-interactions assignment
 *****************************************************************************************/
 
 // require express, express-handlebars and body-parser
@@ -38,6 +38,7 @@ app.get('/',function(req,res){
     res.render('app');
 });
 
+// route provided in homework instrurctions
 app.get('/reset-table',function(req,res,next){
   var context = {};
   mysql.pool.query("DROP TABLE IF EXISTS workouts", function(err){ //replace your connection pool with the your variable containing the connection pool
@@ -55,85 +56,101 @@ app.get('/reset-table',function(req,res,next){
   });
 });
 
+// selects and returns all rows in table
 app.get('/render-table', function(req, res, next){
 
   res.type('application/json');
   mysql.pool.query('SELECT * FROM workouts', function(err, rows, fields){
     if (err) {
-      res.send(JSON.stringify({"error": err}));
+      res.send(JSON.stringify({"error": err})); // send error object on error
     } else {
-      res.send(JSON.stringify(rows));
+      res.send(JSON.stringify(rows)); // send all rows
     }
   });
 
 });
 
+// adds row to db with provided information in post body
 app.post('/add-exercise', function(req, res, next) {
   
+  // build request array and string
   var reqVals = [req.body.name, req.body.reps, req.body.weight, req.body.date, req.body.unit];
   var addString = 'INSERT INTO workouts (`name`, `reps`, `weight`, `date`, `lbs`)'
                 + 'VALUES (?, ?, ?, ?, ?)';
   var results = {};
   
+  // set response type
   res.type('application/json');
 
+  // make insert query
   mysql.pool.query(addString, reqVals, function(err, result) {
 
     if (err) {
 
       results["err"] = err;
-      res.send(JSON.stringify(results));
+      res.send(JSON.stringify(results)); // return error object
 
     } else {
 
       results['id'] = result.insertId;
-      res.send(JSON.stringify(results));
+      res.send(JSON.stringify(results)); // return object containing new id of added row
 
     }
   });
 
 });
 
+// delete exercise from the db
 app.post('/delete-exercise', function(req, res, next) {
 
+  // create query string
   var deleteString = 'DELETE FROM workouts WHERE id = (?)';
 
+  // set response type
   res.type('application/json');
 
+  // send query
   mysql.pool.query(deleteString, [req.body.id], function(err, result){
     if(err) {
-      res.send(JSON.stringify({"error": "true"}));
+      res.send(JSON.stringify({"error": "true"})); // return error object
     } else {
-      res.send(JSON.stringify({"error": "false"}));
+      res.send(JSON.stringify({"error": "false"})); // return no error object
     }
   });
   
 });
 
+// updates an object with the new user provided information
 app.post('/update-exercise', function(req, res, next) {
 
+  // build select and update strings for safe update
   var selectString = "SELECT * FROM workouts WHERE id=?";
   var updateString = "UPDATE workouts SET name=?, reps=?, weight=?, date=?, lbs=? WHERE id=?";
+
+  // set response type
   res.type('application/json');
 
+  // send select query to ensure row exists
   mysql.pool.query(selectString, [req.body.id], function(err, result) {
 
     if (err) {
-      // handle error
-    } else if (result.length == 1) {
+      res.send(JSON.stringify({"err": "true"}));  // send error object
+    } else if (result.length == 1) { // row exists
 
+      // build update query and arrays
       var currentVals = result[0];
       var queryArr = [req.body.name || currentVals.name, req.body.reps || currentVals.reps,
       req.body.weight || currentVals.weight, req.body.date || currentVals.date, req.body.lbs || currentVals.lbs,
       req.body.id];
 
+      // send query
       mysql.pool.query(updateString, queryArr, function(err, results) {
 
         if (err) {
-          // handle error
+          res.send(JSON.stringify({"err": "true"})); // send error object
         } else {
 
-          res.send(JSON.stringify(
+          res.send(JSON.stringify( // send updated row contents
             {
               "name": queryArr[0],
               "reps": queryArr[1],
@@ -143,15 +160,10 @@ app.post('/update-exercise', function(req, res, next) {
               "id": queryArr[5]
             }
           ));
-
         }
-
       });
-
     }
-
   });
-
 });
 
 

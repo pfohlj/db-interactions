@@ -1,12 +1,33 @@
+/*****************************************************************************************
+** Name: Joseph A Pfohl
+** Date: 11/30/2016
+** Assignment: db-interactions
+** Description: This file contains the client side scripts for the workout tracker single
+** page application.  Because this app is designed not to reload pages ever, all requests
+** to and from the server are handled via AJAX from this page, including the initial table
+** render.  For more details, plese see the inline comments.
+*****************************************************************************************/
+
+/* This contains the initial work of the table, setting up for work to be handled by the various
+event handlers included in the app. */
 $(document).ready(function() {
+    // make tag creator functions and render the table body
     makeTags('tr', 'td', 'button', 'input', 'label', 'form', 'select', 'option', 'div');
     renderTable();
 
+    // set up event handlers
     $('#add-button').on('click', addExercise);
     $('tbody').on('click', '.delete-button', removeExercise);
     $('tbody').on('click', '.edit-button', editExercise);
+
+    // activate date polyfill
     $(':input').date();
 });
+
+/*****************************************************************************************
+** FUNCTION: renderTable()
+** DESCRIPTION: renders the table with the data stored on the database
+*****************************************************************************************/
 
 function renderTable() {
     // create, initialize, and configure XMLHttpRequest object
@@ -17,14 +38,18 @@ function renderTable() {
     req.addEventListener('load', function() {
         if (req.status >= 200 && req.status < 400) {
 
-            if (!("err" in JSON.parse(req.responseText))) {
-                var tableRows = JSON.parse(req.responseText);
-                var re = /(\d+-\d+-\d+)/g;
+            if (!("err" in JSON.parse(req.responseText))) { // no errors requesting data from DB
 
-                for (var i = 0, l = tableRows.length; i < l; i++) {
+                var tableRows = JSON.parse(req.responseText);
+                var re = /(\d+-\d+-\d+)/g; // regex for selecting only what we want from returned Date object
+
+                // create and append a row for each result returned from the server
+                for (var i = 0, l = tableRows.length; i < l; i++) { 
+
                     var tempRow = 
-                    tr({"id": "row-" + tableRows[i]["id"], "data-id": tableRows[i]["id"], "data-name": tableRows[i]["name"], "data-reps": tableRows[i]["reps"], 
-                    "data-weight": tableRows[i]["weight"], "data-lbs": tableRows[i]["lbs"], "data-date": tableRows[i]["date"]}, [
+                    tr({"id": "row-" + tableRows[i]["id"], "data-id": tableRows[i]["id"], "data-name": tableRows[i]["name"], 
+                    "data-reps": tableRows[i]["reps"], "data-weight": tableRows[i]["weight"], "data-lbs": tableRows[i]["lbs"], 
+                    "data-date": tableRows[i]["date"]}, [
                             td({}, [
                                 text(tableRows[i]["name"]),
                             ]),
@@ -35,7 +60,7 @@ function renderTable() {
                                 text(tableRows[i]["weight"] + (parseInt(tableRows[i]["lbs"]) ? " Lbs." : " Kg." )),
                             ]),
                             td({}, [
-                                text(re[Symbol.match](tableRows[i]["date"])),
+                                text(re[Symbol.match](tableRows[i]["date"])), // get date from string matching format ####-##-##
                             ]),
                             td({}, [
                                 button({'class': 'edit-button u-full-width', 'data-exercise-id': tableRows[i]["id"]}, [
@@ -68,10 +93,17 @@ function renderTable() {
     req.send();
 }
 
+/*****************************************************************************************
+** FUNCTION: addExercise()
+** DESCRIPTION: adds an exercise to the DB and on success, also adds it to the table on
+** the page.
+*****************************************************************************************/
 
 function addExercise(event) {
-     $('#error-text').empty();
+    // by default clear the error text
+    $('#error-text').empty();
 
+    // create object with values from form
     var newExercise = {
         "name": $('#exerciseName').val(),
         "reps": $('#repetitions').val(),
@@ -80,7 +112,9 @@ function addExercise(event) {
         "date": $('#date').val()
     };
 
+    // if the user entered something in each field
     if (newExercise["name"] && newExercise["reps"] && newExercise["weight"] && newExercise["date"]) {
+        
         // create, initialize, and configure XMLHttpRequest object
         var req = new XMLHttpRequest();
         req.open('POST', 'http://localhost:56565/add-exercise', true);
@@ -89,10 +123,10 @@ function addExercise(event) {
         // load event listener
         req.addEventListener('load', function() {
             if (req.status >= 200 && req.status < 400) {
-                
+                // no errors making insertion into DB
                 if (!("err" in JSON.parse(req.responseText))) {
                     $('#error-text').empty();
-                    $("#add-exercise-form").each(function(){ this.reset(); });
+                    $("#add-exercise-form").each(function(){ this.reset(); }); // reset the form fields
                     addRow(req.responseText, newExercise);
                 } else {
                     $('#error-text').text("Something went wrong.  "
@@ -106,7 +140,7 @@ function addExercise(event) {
 
         // failure event listener
         req.addEventListener('error', function() {
-            // handle failure errors somehow...
+            return;
         })
 
         req.send(JSON.stringify(newExercise));
@@ -114,23 +148,32 @@ function addExercise(event) {
         $('#error-text').text("All fields required!").addClass("reset-text");
     }
 
+    // prevent submit from actually submitting the form / reloading page
     event.preventDefault();
 }
+
+/*****************************************************************************************
+** FUNCTION: addRow()
+** DESCRIPTION: Adds a row to the end of the table containing the information in exercise
+*****************************************************************************************/
 
 function addRow(response, exercise) {
     
     var resID = JSON.parse(response);
     var unit;
 
+    // determine unit
     if (exercise["unit"] == "1") {
         unit = " Lbs.";
     } else {
         unit = " Kg.";
     }
 
+    // construct new row
     var newRow = 
-    tr({"id": "row-" + resID["id"], "data-id": resID["id"], "data-name": exercise["name"], "data-reps": exercise["reps"], 
-    "data-weight": exercise["weight"], "data-lbs": exercise["lbs"], "data-date": exercise["date"]}, [
+    tr({"id": "row-" + resID["id"], "data-id": resID["id"], "data-name": exercise["name"], 
+    "data-reps": exercise["reps"], "data-weight": exercise["weight"], "data-lbs": exercise["lbs"], 
+    "data-date": exercise["date"]}, [
         td({}, [
             text(exercise["name"]),
         ]),
@@ -155,11 +198,18 @@ function addRow(response, exercise) {
         ])
     ]);
 
+    // append row
     $("#exercise-list").append(newRow);
 }
 
+/*****************************************************************************************
+** FUNCTION: removeExercise()
+** DESCRIPTION: removes an exercise from the DB and table
+*****************************************************************************************/
+
 function removeExercise(event, id) {
 
+    // get exercise ID and create object for request
     var exID = $(this).parents('tr').attr('data-id');
     var reqContent = {
         "id": exID,
@@ -173,7 +223,7 @@ function removeExercise(event, id) {
     // load event listener
     req.addEventListener('load', function() {
         if (req.status >= 200 && req.status < 400) {
-           $("#row-" + exID).remove();
+           $("#row-" + exID).remove(); // remove the row
 		} else {
           return;
 		}
@@ -187,9 +237,17 @@ function removeExercise(event, id) {
     req.send(JSON.stringify(reqContent));
 }
 
+/*****************************************************************************************
+** FUNCTION: editExercise()
+** DESCRIPTION: Edit exercise allows you to edit an exercises parameters right in the 
+** table row where it is displayed.  It replaces the row with a form containing the 
+** information already in the exercuse and then allows you to submit the changes to the
+** server before rerendering just that row with the new information
+*****************************************************************************************/
+
 function editExercise(event) {
     
-    var rowForm;
+    // build the request object
     var exercise = {
         "id": $(this).parents('tr').attr('data-id'),
         "name": $(this).parents('tr').attr('data-name'),
@@ -199,10 +257,10 @@ function editExercise(event) {
         "date": $(this).parents('tr').attr('data-date')
     };
 
-    var re = /(\d+-\d+-\d+)/g;
+    var re = /(\d+-\d+-\d+)/g; // used for formatting date in the row / form
 
-
-    rowForm =
+    // build our table row form(ish)
+    var rowForm =
     tr({"id": "rowForm"}, [
         td({},[
             label({}, [
@@ -246,33 +304,42 @@ function editExercise(event) {
         ]),
     ]);
 
+    // create a jQuery object from the DOM object
     var jRowForm = $(rowForm);
 
+    // update the selected select input option
     if (exercise["lbs"] == "1") {
         jRowForm.find("#row-lbs option:first-child").attr("selected", "selected");
     } else {
         jRowForm.find("#row-lbs option:nth-child(2)").attr("selected", "selected");
     }
 
-
+    // bring focus to the row by dimming and disabling buttons and text
     $('button').prop('disabled', true).addClass("disabled-button");
     $('input[type="button"]').prop('disabled', true).addClass("disabled-button");
     $('td, .head-text').attr("style", "color: #BABABA;");
+
+    // insert the new form and set the date polyfill
     $('#row-' + exercise["id"]).replaceWith(jRowForm);
     $(':input').date();
 
+    // event listener for sate button
     $("#save-button").click(function() {
         
+        // automatically empty row error
         $('#row-error').empty();
 
+        // update exercise fields with any new information
         exercise["name"] = $('#row-name').val();
         exercise["reps"] = $('#row-reps').val();
         exercise["weight"] = $('#row-weight').val();
         exercise["lbs"] = $('#row-lbs').val(),
         exercise["date"] = $('#row-date').val();
 
+        // ensure user not submitting empty fields
         if (exercise["name"] && exercise["reps"] && exercise["weight"] && exercise["lbs"] && exercise["date"]) {
 
+            // create and configure request
             var req = new XMLHttpRequest();
             req.open('POST', 'http://localhost:56565/update-exercise', true);
             req.setRequestHeader('Content-Type', 'application/json');
@@ -282,6 +349,7 @@ function editExercise(event) {
                 if (req.status >= 200 && req.status < 400) {
                     var updatedRow = JSON.parse(req.responseText);
 
+                    // rebuild the table row with the new information
                     var tempRow = 
                     tr({"id": "row-" + updatedRow["id"], "data-id": updatedRow["id"], "data-name": updatedRow["name"], "data-reps": updatedRow["reps"], 
                     "data-weight": updatedRow["weight"], "data-lbs": updatedRow["lbs"], "data-date": updatedRow["date"]}, [
@@ -309,9 +377,12 @@ function editExercise(event) {
                         ])
                     ]);
 
+                    // remove row focus styles
                     $('button').prop('disabled', false).removeClass("disabled-button");
                     $('input[type="button"]').prop('disabled', false).removeClass("disabled-button");
                     $('td, .head-text').removeAttr("style");
+
+                    // reinsert new updated row
                     $('#rowForm').replaceWith(tempRow);
                     
                 } else {
