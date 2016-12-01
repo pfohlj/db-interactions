@@ -1,11 +1,11 @@
 $(document).ready(function() {
-    makeTags('tr', 'td', 'button', 'input', 'form', 'select', 'option');
+    makeTags('tr', 'td', 'button', 'input', 'label', 'form', 'select', 'option', 'div');
     renderTable();
 
     $('#add-button').on('click', addExercise);
     $('tbody').on('click', '.delete-button', removeExercise);
     $('tbody').on('click', '.edit-button', editExercise);
-
+    $(':input').date();
 });
 
 function renderTable() {
@@ -17,48 +17,52 @@ function renderTable() {
     req.addEventListener('load', function() {
         if (req.status >= 200 && req.status < 400) {
 
-           var tableRows = JSON.parse(req.responseText);
-           var re = /(\d+-\d+-\d+)/g;
+            if (!("err" in JSON.parse(req.responseText))) {
+                var tableRows = JSON.parse(req.responseText);
+                var re = /(\d+-\d+-\d+)/g;
 
-           for (var i = 0, l = tableRows.length; i < l; i++) {
-               var tempRow = 
-               tr({"id": "row-" + tableRows[i]["id"], "data-id": tableRows[i]["id"], "data-name": tableRows[i]["name"], "data-reps": tableRows[i]["reps"], 
-               "data-weight": tableRows[i]["weight"], "data-lbs": tableRows[i]["lbs"], "data-date": tableRows[i]["date"]}, [
-                    td({}, [
-                        text(tableRows[i]["name"]),
-                    ]),
-                    td({}, [
-                        text(tableRows[i]["reps"]),
-                    ]),
-                    td({}, [
-                        text(tableRows[i]["weight"] + (parseInt(tableRows[i]["lbs"]) ? " Lbs." : " Kg." )),
-                    ]),
-                    td({}, [
-                        text(re[Symbol.match](tableRows[i]["date"])),
-                    ]),
-                    td({}, [
-                        button({'class': 'edit-button u-full-width', 'data-exercise-id': tableRows[i]["id"]}, [
-                            text("Edit"),
-                        ])
-                    ]),
-                    td({}, [
-                        button({'class': 'delete-button u-full-width', 'data-exercise-id': tableRows[i]["id"]}, [
-                            text("Delete"),
-                        ])
-                    ])
-                ]);
+                for (var i = 0, l = tableRows.length; i < l; i++) {
+                    var tempRow = 
+                    tr({"id": "row-" + tableRows[i]["id"], "data-id": tableRows[i]["id"], "data-name": tableRows[i]["name"], "data-reps": tableRows[i]["reps"], 
+                    "data-weight": tableRows[i]["weight"], "data-lbs": tableRows[i]["lbs"], "data-date": tableRows[i]["date"]}, [
+                            td({}, [
+                                text(tableRows[i]["name"]),
+                            ]),
+                            td({}, [
+                                text(tableRows[i]["reps"]),
+                            ]),
+                            td({}, [
+                                text(tableRows[i]["weight"] + (parseInt(tableRows[i]["lbs"]) ? " Lbs." : " Kg." )),
+                            ]),
+                            td({}, [
+                                text(re[Symbol.match](tableRows[i]["date"])),
+                            ]),
+                            td({}, [
+                                button({'class': 'edit-button u-full-width', 'data-exercise-id': tableRows[i]["id"]}, [
+                                    text("Edit"),
+                                ])
+                            ]),
+                            td({}, [
+                                button({'class': 'delete-button u-full-width', 'data-exercise-id': tableRows[i]["id"]}, [
+                                    text("Delete"),
+                                ])
+                            ])
+                        ]);
 
-                document.getElementById("exercise-list").appendChild(tempRow);
-           }
+                        $("#exercise-list").append(tempRow);
+                }
+            } else {
+                $("#error-text").text("There was a problem accessing the databse.  Plese refresh the page or try again later.").addClass("reset-text");
+            }
 
 		} else {
-           // handle errors here
+          $("#error-text").text("Something went wrong.").addClass("reset-text");
 		}
     });
 
     // failure event listener
     req.addEventListener('error', function() {
-        // handle failure errors somehow...
+        $("#error-text").text("Something went seriously wrong!.").addClass("reset-text");
 	})
 
     req.send();
@@ -66,6 +70,8 @@ function renderTable() {
 
 
 function addExercise(event) {
+     $('#error-text').empty();
+
     var newExercise = {
         "name": $('#exerciseName').val(),
         "reps": $('#repetitions').val(),
@@ -74,29 +80,40 @@ function addExercise(event) {
         "date": $('#date').val()
     };
 
-    console.log(newExercise);
+    if (newExercise["name"] && newExercise["reps"] && newExercise["weight"] && newExercise["date"]) {
+        // create, initialize, and configure XMLHttpRequest object
+        var req = new XMLHttpRequest();
+        req.open('POST', 'http://localhost:56565/add-exercise', true);
+        req.setRequestHeader('Content-Type', 'application/json');
 
-    // create, initialize, and configure XMLHttpRequest object
-    var req = new XMLHttpRequest();
-    req.open('POST', 'http://localhost:56565/add-exercise', true);
-    req.setRequestHeader('Content-Type', 'application/json');
+        // load event listener
+        req.addEventListener('load', function() {
+            if (req.status >= 200 && req.status < 400) {
+                
+                if (!("err" in JSON.parse(req.responseText))) {
+                    $('#error-text').empty();
+                    $("#add-exercise-form").each(function(){ this.reset(); });
+                    addRow(req.responseText, newExercise);
+                } else {
+                    $('#error-text').text("Something went wrong.  "
+                    + "Check your entries and try again please.").addClass("resetText");
+                }
 
-    // load event listener
-    req.addEventListener('load', function() {
-        if (req.status >= 200 && req.status < 400) {
-           $("#add-exercise-form").each(function(){ this.reset(); });
-           addRow(req.responseText, newExercise);
-		} else {
-           // handle errors here
-		}
-    });
+            } else {
+                $('#error-text').text("Something went wrong, please try again!").addClass("resetText");
+            }
+        });
 
-    // failure event listener
-    req.addEventListener('error', function() {
-        // handle failure errors somehow...
-	})
+        // failure event listener
+        req.addEventListener('error', function() {
+            // handle failure errors somehow...
+        })
 
-    req.send(JSON.stringify(newExercise));
+        req.send(JSON.stringify(newExercise));
+    } else {
+        $('#error-text').text("All fields required!").addClass("reset-text");
+    }
+
     event.preventDefault();
 }
 
@@ -138,7 +155,7 @@ function addRow(response, exercise) {
         ])
     ]);
 
-    document.getElementById("exercise-list").appendChild(newRow);
+    $("#exercise-list").append(newRow);
 }
 
 function removeExercise(event, id) {
@@ -158,13 +175,13 @@ function removeExercise(event, id) {
         if (req.status >= 200 && req.status < 400) {
            $("#row-" + exID).remove();
 		} else {
-           // handle errors here
+          return;
 		}
     });
 
     // failure event listener
     req.addEventListener('error', function() {
-        // handle failure errors somehow...
+        return;
 	})
 
     req.send(JSON.stringify(reqContent));
@@ -182,21 +199,34 @@ function editExercise(event) {
         "date": $(this).parents('tr').attr('data-date')
     };
 
-    if (exercise["lbs"] == "1") {
-        rowForm =
-        tr({}, [
-            td({},[
+    var re = /(\d+-\d+-\d+)/g;
+
+
+    rowForm =
+    tr({"id": "rowForm"}, [
+        td({},[
+            label({}, [
+                text("Name"),
                 input({"class": "u-full-width", "type": "text", "name": "name", "id": "row-name", "value": exercise["name"]}, []),
             ]),
-            td({},[
+        ]),
+        td({},[
+            label({}, [
+                text("Reps"),
                 input({"class": "u-full-width", "type": "number", "name": "reps", "id": "row-reps", "value": exercise["reps"]}, []),
             ]),
-            td({},[
+        ]),
+        td({},[
+            label({}, [
+                text("Weight"),
                 input({"class": "u-full-width", "type": "number", "name": "weight", "id": "row-weight", "value": exercise["weight"]}, []),
             ]),
-            td({},[
+        ]),
+        td({},[
+            label({}, [
+                text("Unit"),
                 select({"class": "u-full-width", "name": "lbs", "id": "row-lbs"}, [
-                    option({"value": "1", "selected": "selected"}, [
+                    option({"value": "1"}, [
                         text("Pounds")
                     ]),
                     option({"value": "0"}, [
@@ -204,48 +234,102 @@ function editExercise(event) {
                     ]),
                 ]),
             ]),
-            td({},[
-                input({"type": "date", "name": "date", "id": "row-date", "value": exercise["date"]}, []),
+        ]),
+        td({},[
+            label({}, [
+                text("Date"),
+                input({"type": "date", "name": "date", "id": "row-date", "value": re[Symbol.match](exercise["date"])}, []),
             ]),
-            td({},[
-                input({"class": "u-full-width button", "type": "button", "value": "save", "id": "save-button"}, [])
-            ]),
-        ]);
+        ]),
+        td({},[
+            input({"class": "u-full-width button", "type": "button", "value": "save", "id": "save-button"}, [])
+        ]),
+    ]);
+
+    var jRowForm = $(rowForm);
+
+    if (exercise["lbs"] == "1") {
+        jRowForm.find("#row-lbs option:first-child").attr("selected", "selected");
     } else {
-        rowForm =
-        tr({}, [ 
-            td({},[
-                input({"class": "u-full-width", "type": "text", "name": "name", "id": "row-name", "value": exercise["name"]}, []),
-            ]),
-            td({},[
-                input({"class": "u-full-width", "type": "number", "name": "reps", "id": "row-reps", "value": exercise["reps"]}, []),
-            ]),
-            td({},[
-                input({"class": "u-full-width", "type": "number", "name": "weight", "id": "row-weight", "value": exercise["weight"]}, []),
-            ]),
-            td({},[
-                select({"class": "u-full-width", "name": "lbs", "id": "row-lbs"}, [
-                    option({"value": "1"}, [
-                        text("Pounds")
-                    ]),
-                    option({"value": "0", "selected": "selected"}, [
-                        text("Kilograms"),
-                    ]),
-                ]),
-            ]),
-            td({},[
-                input({"type": "date", "name": "date", "id": "row-date", "value": exercise["date"]}, []),
-            ]),
-            td({},[
-                input({"class": "u-full-width button", "type": "button", "value": "save", "id": "save-button"}, [])
-            ]),
-        ]);
+        jRowForm.find("#row-lbs option:nth-child(2)").attr("selected", "selected");
     }
+
 
     $('button').prop('disabled', true).addClass("disabled-button");
     $('input[type="button"]').prop('disabled', true).addClass("disabled-button");
-    $('#row-' + exercise["id"]).replaceWith(rowForm);
+    $('td, .head-text').attr("style", "color: #BABABA;");
+    $('#row-' + exercise["id"]).replaceWith(jRowForm);
+    $(':input').date();
 
+    $("#save-button").click(function() {
+        
+        $('#row-error').empty();
+
+        exercise["name"] = $('#row-name').val();
+        exercise["reps"] = $('#row-reps').val();
+        exercise["weight"] = $('#row-weight').val();
+        exercise["lbs"] = $('#row-lbs').val(),
+        exercise["date"] = $('#row-date').val();
+
+        if (exercise["name"] && exercise["reps"] && exercise["weight"] && exercise["lbs"] && exercise["date"]) {
+
+            var req = new XMLHttpRequest();
+            req.open('POST', 'http://localhost:56565/update-exercise', true);
+            req.setRequestHeader('Content-Type', 'application/json');
+
+            // load event listener
+            req.addEventListener('load', function() {
+                if (req.status >= 200 && req.status < 400) {
+                    var updatedRow = JSON.parse(req.responseText);
+
+                    var tempRow = 
+                    tr({"id": "row-" + updatedRow["id"], "data-id": updatedRow["id"], "data-name": updatedRow["name"], "data-reps": updatedRow["reps"], 
+                    "data-weight": updatedRow["weight"], "data-lbs": updatedRow["lbs"], "data-date": updatedRow["date"]}, [
+                        td({}, [
+                            text(updatedRow["name"]),
+                        ]),
+                        td({}, [
+                            text(updatedRow["reps"]),
+                        ]),
+                        td({}, [
+                            text(updatedRow["weight"] + (parseInt(updatedRow["lbs"]) ? " Lbs." : " Kg." )),
+                        ]),
+                        td({}, [
+                            text(updatedRow["date"]),
+                        ]),
+                        td({}, [
+                            button({'class': 'edit-button u-full-width', 'data-exercise-id': updatedRow["id"]}, [
+                                text("Edit"),
+                            ])
+                        ]),
+                        td({}, [
+                            button({'class': 'delete-button u-full-width', 'data-exercise-id': updatedRow["id"]}, [
+                                text("Delete"),
+                            ])
+                        ])
+                    ]);
+
+                    $('button').prop('disabled', false).removeClass("disabled-button");
+                    $('input[type="button"]').prop('disabled', false).removeClass("disabled-button");
+                    $('td, .head-text').removeAttr("style");
+                    $('#rowForm').replaceWith(tempRow);
+                    
+                } else {
+                    return;
+                }
+            });
+
+            // failure event listener
+            req.addEventListener('error', function() {
+                return;
+            })
+
+            req.send(JSON.stringify(exercise));
+
+        } else {
+             $('#row-error').text("All fields required!").addClass("reset-text");
+        }
+    });
 }
 
 /*****************************************************************************************

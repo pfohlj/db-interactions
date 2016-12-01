@@ -60,7 +60,7 @@ app.get('/render-table', function(req, res, next){
   res.type('application/json');
   mysql.pool.query('SELECT * FROM workouts', function(err, rows, fields){
     if (err) {
-      res.send(JSON.stringify({"error": "true"}));
+      res.send(JSON.stringify({"error": err}));
     } else {
       res.send(JSON.stringify(rows));
     }
@@ -73,19 +73,22 @@ app.post('/add-exercise', function(req, res, next) {
   var reqVals = [req.body.name, req.body.reps, req.body.weight, req.body.date, req.body.unit];
   var addString = 'INSERT INTO workouts (`name`, `reps`, `weight`, `date`, `lbs`)'
                 + 'VALUES (?, ?, ?, ?, ?)';
-  var results = {
-    'id': -1
-  };
+  var results = {};
   
   res.type('application/json');
 
   mysql.pool.query(addString, reqVals, function(err, result) {
 
     if (err) {
+
+      results["err"] = err;
       res.send(JSON.stringify(results));
+
     } else {
+
       results['id'] = result.insertId;
       res.send(JSON.stringify(results));
+
     }
   });
 
@@ -106,6 +109,51 @@ app.post('/delete-exercise', function(req, res, next) {
   });
   
 });
+
+app.post('/update-exercise', function(req, res, next) {
+
+  var selectString = "SELECT * FROM workouts WHERE id=?";
+  var updateString = "UPDATE workouts SET name=?, reps=?, weight=?, date=?, lbs=? WHERE id=?";
+  res.type('application/json');
+
+  mysql.pool.query(selectString, [req.body.id], function(err, result) {
+
+    if (err) {
+      // handle error
+    } else if (result.length == 1) {
+
+      var currentVals = result[0];
+      var queryArr = [req.body.name || currentVals.name, req.body.reps || currentVals.reps,
+      req.body.weight || currentVals.weight, req.body.date || currentVals.date, req.body.lbs || currentVals.lbs,
+      req.body.id];
+
+      mysql.pool.query(updateString, queryArr, function(err, results) {
+
+        if (err) {
+          // handle error
+        } else {
+
+          res.send(JSON.stringify(
+            {
+              "name": queryArr[0],
+              "reps": queryArr[1],
+              "weight": queryArr[2],
+              "date": queryArr[3],
+              "lbs": queryArr[4],
+              "id": queryArr[5]
+            }
+          ));
+
+        }
+
+      });
+
+    }
+
+  });
+
+});
+
 
 // 404 route
 app.use(function(req,res){

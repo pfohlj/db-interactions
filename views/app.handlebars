@@ -1,12 +1,13 @@
 <h1 class="centered-text">Workout Tracker</h1>
 
 {{#if reset}}
-    <em><p id="reset-text" class="centered-text">{{reset}}</p></em>
+    <em><p class="reset-text" class="centered-text">{{reset}}</p></em>
 {{/if}}
 
 <div class="section add-form">
     <div class="container">
         <h2>Add an Exercise</h2>
+        <h5 id="error-text"></h5>
         <form id="add-exercise-form">
             <div class="row">
                 <div class="three columns">
@@ -29,13 +30,13 @@
                     </select>
                 </div>
                 <div class="three columns">
-                    <label for="date">Date Completed</label>
+                    <label for="date">Date</label>
                     <input class="u-full-width" type="date" name="date" id="date">
                 </div>
             </div>
             <div class="row">
                 <div class="two columns offset-by-four">
-                    <input id="add-button" class="u-full-width button-primary" type="button" value="Submit">
+                    <input id="add-button" class="u-full-width button-primary" type="submit" value="Submit">
                 </div>
                 <div class="two columns">
                     <button id="reset-button" class="u-full-width button" type="reset" value="Reset">Reset</button>
@@ -48,15 +49,16 @@
 <div class="section display-table">
     <div class="container">
         <h2>Completed Exercises</h2>
+        <h5 id="row-error"></h5>
         <div class="row">
 
-            <table class="u-full-width">
+            <table id="complete-exercises" class="u-full-width">
                 <thead>
                     <tr>
-                        <th>Exercise Name</th>
-                        <th>Repititions</th>
-                        <th>Weight</th>
-                        <th>Date Completed</th>
+                        <th class="head-text">Exercise Name</th>
+                        <th class="head-text">Repititions</th>
+                        <th class="head-text">Weight</th>
+                        <th class="head-text">Date</th>
                         <th></th>
                         <th></th>
                     </tr>
@@ -69,53 +71,4 @@
         </div>
     </div>
 </div>
-
-
-
-{{!--<div class="container">
-    <h2>Completed Exercises</h2>
-    <div class="row">
-
-        <table class="u-full-width">
-            <thead>
-                <tr>
-                    <th>Exercise Name</th>
-                    <th>Repititions</th>
-                    <th>Weight</th>
-                    <th>Date Completed</th>
-                    <th></th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <form action="">
-                        <td>
-                            <input class="u-full-width" type="text" name="name" id="exerciseName">
-                        </td>
-                        <td>
-                            <input class="u-full-width" type="number" name="reps" id="repetitions">
-                        </td>
-                        <td>
-                            <input class="u-full-width" type="number" name="weight" id="weight">
-                        </td>
-                        <td>
-                            <select class="u-full-width" name="unit" id="unit">
-                                <option value="1">Pounds</option>
-                                <option value="0">Kilograms</option>
-                            </select>
-                        </td>
-                        <td>
-                            <input type="date" name="date" id="date">
-                        </td>
-                        <td>
-                            <input id="add-button" class="u-full-width button-primary" type="button" value="save">
-                        </td>
-                    </form>
-                </tr>
-            </tbody>
-        </table>
-
-    </div>
-</div>--}}
 
